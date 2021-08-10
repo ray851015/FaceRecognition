@@ -6,7 +6,12 @@ const Register = ({onRouteChange} ) =>{
    <div className="pa4 black-80 ">
    <form className="measure ">
      <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
-       <legend className="f1 fw7 ph0 mh0">Sign In</legend>
+       <legend className="f1 fw7 ph0 mh0">Register</legend>
+
+       <div className="mt3">
+         <label className="db fw6 lh-copy f6" for="name">name</label>
+         <input className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="name" name="name"  id="name"/>
+       </div>
        <div className="mt3">
          <label className="db fw6 lh-copy f6" for="email-address">Email</label>
          <input className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="email" name="email-address"  id="email-address"/>
@@ -15,10 +20,10 @@ const Register = ({onRouteChange} ) =>{
          <label className="db fw6 lh-copy f6" for="password">Password</label>
          <input className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="password" name="password"  id="password"/>
        </div>
-       <label className="pa0 ma0 lh-copy f6 pointer"> Register</label>
+   
      </fieldset>
      <div className="">
-       <input className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" type="submit" value="Sign in" onClick={ () => onRouteChange('home')}/>
+       <input className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" type="submit" value="Register" onClick={ () => onRouteChange('home')}/>
      </div>
    </form>
  </div>
