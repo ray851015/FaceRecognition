@@ -26,16 +26,34 @@ const particlesOptions = {
   },
 };
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
+const initialState ={
       input: "",
       imageUrl: "",
       box: {},
       route:'signin',
       isSignedIn: false,
-    };
+      user:{
+        id:'',
+        name:'',
+        email: '',
+        entries: 0,
+        joined: ''
+      }
+      }
+class App extends Component {
+  constructor() {
+    super();
+    this.state = initialState;
+    
+  }
+  loadUser = (data) => {
+    this.setState({user:{
+      id:data.id,
+      name:data.name,
+      email: data.email,
+      entries: data.entries,
+      joined: data.joined
+    }})
   }
   calculateFaceLocation = (data) => {
     const clarifaiFace =
@@ -48,7 +66,7 @@ class App extends Component {
       topRow: clarifaiFace.top_row * height,
       rightCol: width - clarifaiFace.right_col * width,
       bottomRow: height - clarifaiFace.bottom_row * height,
-    };
+    }
   };
   displayFaceBox = (box) => {
     console.log(box);
@@ -62,51 +80,63 @@ class App extends Component {
     this.setState({ imageUrl: this.state.input });
     app.models
       .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
-      .then((response) =>
-        this.displayFaceBox(this.calculateFaceLocation(response))
-      )
+      .then(response => {
+      if(response){
+        fetch('http://localhost:3000/image',{
+          method:'put',
+          headers:{'Content-Type': 'application/json'},
+          body:JSON.stringify({
+           id :this.state.user.id
+          })
+        })
+        .then(response => response.json())
+        .then(count => {
+          this.setState(Object.assign(this.state.user,{entries:count}))
+          })
+          .catch(console.log)
+        
+     } 
+     this.displayFaceBox(this.calculateFaceLocation(response))
+    })
       .catch((err) => console.log(err));
   };
 
-  isSignedIn = () =>{
-    console.log('isSignedIn');
-  }
   onRouteChange = (route) => {
     if( route === 'signout'){
-      this.setState({isSignedIn : false})
+      this.setState(initialState)
     }else if (route === 'home'){
       this.setState({isSignedIn: true })
     }
-    this.setState({route:route})
-    console.log(route); 
+    this.setState({route :route});
   }
 
   render() {
-    const { imageUrl,box,isSignedIn} = this.state;
+    const { imageUrl,box,isSignedIn,route} = this.state;
     return (
-     
       <div className="App">
-        <Particles className="particles" params={particlesOptions} />
-        <Navigation isSignedIn={this.state.isSignedIn} onRouteChange={this.onRouteChange}/>
-        
-     {this.state.route === 'home' 
-     ?  <div> 
-     <Logo />
-     <Rank />
-     <ImageLinkForm
-       onInputChange={this.onInputChange}
-       onButtonSubmit={this.onButtonSubmit}
-     />
-     <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl} />
-     </div>
-    :  this.state.route === 'signin' 
-      ? <LoginPage onRouteChange={this.onRouteChange}/>
-    : (this.state.route === 'signout'
-
-      ?<LoginPage onRouteChange={this.onRouteChange}/>
-      :<Register onRouteChange={this.onRouteChange}/>
-    )
-    }
+         <Particles className='particles'
+          params={particlesOptions}
+        />
+        <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange} />
+        { route === 'home'
+          ? <div>
+              <Logo />
+              <Rank
+                name={this.state.user.name}
+                entries={this.state.user.entries}
+              />
+              <ImageLinkForm
+                onInputChange={this.onInputChange}
+                onButtonSubmit={this.onButtonSubmit}
+              />
+              <FaceRecognition box={box} imageUrl={imageUrl} />
+            </div>
+          : (
+             route === 'signin'
+             ? <LoginPage loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
+             : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
+            )
+        }
       </div>
     );
   }
